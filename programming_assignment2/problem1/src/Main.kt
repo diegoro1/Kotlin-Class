@@ -3,13 +3,27 @@ import java.util.Scanner
 import kotlin.system.exitProcess
 
 // OOP was not allowed in this problem
-// TODO: add difficulty to questions, add subtractions and division. make sure all return types are int
+
+// returns an int based on difficulty
+fun generateNumber(difficulty: Int, rand: SecureRandom): Int
+{
+    var number = 0
+    when(difficulty)
+    {
+        1 -> number = rand.nextInt(8) + 1 // so 0 is not a choice
+        2 -> number = rand.nextInt(98) + 1
+        3 -> number = rand.nextInt(998) + 1
+        4 -> number = rand.nextInt(9998) + 1
+    }
+
+    return number
+}
 
 // returns answer to addition question
-fun additionQuestion(rand: SecureRandom): Int
+fun additionQuestion(rand: SecureRandom, difficulty: Int): Int
 {
-    val x = rand.nextInt(10)
-    val y = rand.nextInt(10)
+    val x = generateNumber(difficulty, rand)
+    val y = generateNumber(difficulty, rand)
 
     println("How much is $x plus $y?")
 
@@ -17,14 +31,50 @@ fun additionQuestion(rand: SecureRandom): Int
 }
 
 // returns answer to the multiplication question
-fun multiplicationQuestion(rand: SecureRandom): Int
+fun multiplicationQuestion(rand: SecureRandom, difficulty: Int): Int
 {
-    val x = rand.nextInt(10)
-    val y = rand.nextInt(10)
+    val x = generateNumber(difficulty, rand)
+    val y = generateNumber(difficulty, rand)
 
     println("How much is $x times $y?")
 
     return x * y
+}
+
+// returns answer to the subtraction question (always positive)
+fun subtractionQuestion(rand: SecureRandom, difficulty: Int): Int
+{
+    var x = generateNumber(difficulty, rand)
+    var y = generateNumber(difficulty, rand)
+
+    // makes sure that answer is positive
+    while (y >= x)
+    {
+        x = generateNumber(difficulty, rand)
+        y = generateNumber(difficulty, rand)
+    }
+
+    println("How much is $x minus $y?")
+
+    return x - y
+}
+
+// returns answer to the division question (remainder is always 0, no fractions)
+fun divisionQuestion(rand: SecureRandom, difficulty: Int): Int
+{
+    var x = generateNumber(difficulty, rand)
+    var y = generateNumber(difficulty, rand)
+
+    // makes sure there is no remainder
+    while ((x%y != 0))
+    {
+        x = generateNumber(difficulty, rand)
+        y = generateNumber(difficulty, rand)
+    }
+
+    println("How much is $x divided by $y?")
+
+    return x / y
 }
 
 // returns 1 if answer is correct, else 0
@@ -104,14 +154,27 @@ fun question(problemType: Int, rand: SecureRandom, difficulty: Int): Int
     var answer = 0
     when(problemType)
     {
-        1 -> answer = additionQuestion(rand)
-        2 -> answer = multiplicationQuestion(rand)
-        3 -> answer = subtractionQuestion(rand)
-        4 -> answer = divisionQuestion(rand)
-        5 -> answer = question(rand.nextInt(3) + 1, rand) // selects (1..4)
+        1 -> answer = additionQuestion(rand, difficulty)
+        2 -> answer = multiplicationQuestion(rand, difficulty)
+        3 -> answer = subtractionQuestion(rand, difficulty)
+        4 -> answer = divisionQuestion(rand, difficulty)
+        5 -> answer = question(rand.nextInt(4) + 1, rand, difficulty) // selects (1..4)
     }
 
     return answer
+}
+
+// returns 0 or 1
+fun endMenu(scan: Scanner): Int
+{
+    val answer: Int
+
+    println("Enter the following:")
+    println("1 -> new game")
+    println("2 -> quit")
+
+    answer = scan.nextInt()
+    return if (answer == 1) 1 else 0
 }
 
 fun main()
@@ -142,6 +205,12 @@ fun main()
             println("Please ask your teacher for extra help.")
         else
             println("Congratulations, you are ready to go to the next level!")
+
+        // resets score
+        correctAnswer = 0
+
+        // check if to quit program
+        flag = endMenu(scan)
     }
 
 }
